@@ -1,0 +1,14 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - azuredevops-deployment.yaml
+  - prod_patches/azuredevops-hpa.yaml
+  
+patchesJson6902:
+  - target:
+      group: apps
+      version: v1
+      kind: Deployment
+      name: azuredevops
+    path: prod_patches/azuredevops-prod.yaml
