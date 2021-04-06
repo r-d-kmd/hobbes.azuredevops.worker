@@ -35,17 +35,8 @@ let handleMessage message =
                 |> sprintf "AZURE_TOKEN_%s"
 
             let token = 
-                if System.String.IsNullOrWhiteSpace source.Server then 
-                    if source.Account.ToString() = "kmddk" then
-                        env "AZURE_TOKEN_KMDDK" null
-                    else
-                        env "AZURE_TOKEN_TIME_PAYROLL_KMDDK" null
-                else 
-                    let tokenName = 
-                        source.Server.ToString().Split("/").[3]
-                        |>getTokenName 
-                    env tokenName null
-
+                env "AZURE_DEVOPS_PAT" null
+                
             match synchronize source token with
             None -> 
                 sprintf "Conldn't syncronize. %s %s" sourceDoc token
