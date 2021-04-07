@@ -3,7 +3,5 @@ FSharp.Core
 Newtonsoft.Json
 Thoth.Json.Net
 RabbitMQ.Client
-
-group docker
-    hobbes.core
-    hobbes.web
+hobbes.core
+hobbes.web
