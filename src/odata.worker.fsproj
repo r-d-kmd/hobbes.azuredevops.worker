@@ -2,15 +2,20 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp5.0</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
     <DebugType>Portable</DebugType>
-    <BrokerPath Condition="$(BUILD_ENV) == 'docker'">Broker.fs</BrokerPath>
-    <BrokerPath Condition="$(BrokerPath) == ''">../../../common/hobbes.messaging/src/Broker.fs</BrokerPath>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(BrokerPath)" />
+    <ProjectReference Condition="Exists('../../../libs/hobbes.core/src/hobbes.core.fsproj')" Include="../../../libs/hobbes.core/src/hobbes.core.fsproj" />
+    <ProjectReference Condition="Exists('../../../libs/hobbes.web/src/hobbes.web.fsproj')" Include="../../../libs/hobbes.web/src/hobbes.web.fsproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Condition="Exists('../../../common/hobbes.messaging/src/Broker.fs')" Include="../../../common/hobbes.messaging/src/Broker.fs" />
+    <Compile Condition="! Exists('../../../common/hobbes.messaging/src/Broker.fs')" Include="Broker.fs" />
     <Compile Include="OdataProvider.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
-  <Import Project="..\..\..\.paket\Paket.Restore.targets" />
+  <Import Condition="Exists('../../../.paket/Paket.targets')" Project="../../../.paket/Paket.targets" />
+  <Import Condition="(! Exists('../../../.paket/Paket.targets')) AND Exists('../../../.paket/Paket.Restore.targets') " Project="../../../.paket/Paket.Restore.targets" />
+  <Import Condition="(! (Exists('../../../.paket/Paket.targets') OR Exists('../../../.paket/Paket.Restore.targets'))) AND Exists('/.paket/Paket.Restore.targets')" Project="/.paket/Paket.Restore.targets" />
 </Project>

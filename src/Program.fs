@@ -1,46 +1,34 @@
 open Hobbes.Helpers.Environment
-open Readers.AzureDevOps.Data
-open Readers.AzureDevOps
 open Hobbes.Web
 open Hobbes.Messaging
 open Hobbes.Messaging.Broker
 open Hobbes.FSharp.Compile
+open Hobbes.Web.RawdataTypes
 
-let synchronize (source : AzureDevOpsSource.Root) token =
-    try
-        Reader.sync token source
-        |> Some
-    with e ->
-        Log.excf e "Sync failed due to exception"
-        None
-    |> Option.bind(fun (statusCode,body) ->
-        if statusCode >= 200 && statusCode <= 300 then 
-            Log.debugf "Sync finised with statusCode %d" statusCode
-            match Reader.read source with
-            _,None -> failwith "Could not read data from raw"
-            | key,Some d -> Some (key, d)
-        else
-            Log.errorf  "Syncronization failed. %d Message: %s" statusCode body
-            None                 
-    )
-
-let handleMessage message =
+let private handleMessage message =
     match message with
     Empty -> Success
     | Sync configDoc -> 
         Log.debugf "Received message. %s" configDoc
         try
             let config = 
-                (configDoc |> Config.Parse).Transformation
+                (configDoc |> Hobbes.Web.RawdataTypes.Config.Parse).Transformation
                 |> Hobbes.FSharp.Compile.compile
+                |> Seq.exactlyOne
             let data = ODataProvider.read config.Source
-            let CompiledBlock.Transformation(transformation) = 
-                config.Blocks
-                |> Seq.filter(function
-                                Transformation _ -> true
-                                | _ -> false
-                ) |> Seq.exactlyOne
-            let result = data |> transformation    
+            let transformation = 
+                match config.Blocks
+                    |> Seq.filter(function
+                                    Transformation _ -> true
+                                    | _ -> false
+                    ) |> Seq.exactlyOne with
+                CompiledBlock.Transformation t -> t
+                | _ -> failwith "should have been removed"
+            let result = 
+                data 
+                |> Hobbes.FSharp.DataStructures.DataMatrix.fromTable
+                |> transformation    
+
             
             match Http.post (Http.UniformData Http.Update) (data.ToString()) with
             Http.Success _ -> 
@@ -59,6 +47,6 @@ let main _ =
     Database.initDatabases ["azure_devops_rawdata"]
     async{    
         do! awaitQueue()
-        Broker.AzureDevOps handleMessage
+        Broker.OData handleMessage
     } |> Async.RunSynchronously
     0

@@ -66,11 +66,11 @@ let read (source : Source) =
     let requestData f =
         let rec readChunks url = 
             seq { 
-                
-                let data = f url
-                let record = data |> ODataResponse.Parse
-                let nextLink = record.OdataNextLink
-                record
+                let record = 
+                    let data = f url
+                    let record = data |> ODataResponse.Parse
+                    let nextLink = record.OdataNextLink
+                    record
                     
                 yield! record.Value 
                 if record.OdataNextLink |> System.String.IsNullOrWhiteSpace |> not then 
@@ -94,7 +94,7 @@ let read (source : Source) =
                                     sprintf "$%s=%s" name value
                                 )
               )
-        let cacheFile = cacheDir + "/" + (url |> md5Hash) + ".json"
+        
         url
         |> readChunks
                     
