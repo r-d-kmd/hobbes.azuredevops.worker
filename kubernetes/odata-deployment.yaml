@@ -1,24 +1,24 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: azuredevops
+  name: odata
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: azuredevops
+      app: odata
   template:
     metadata:
       labels:
-        app: azuredevops
+        app: odata
     spec:
       containers:
       - envFrom:
         - secretRef:
             name: env
         imagePullPolicy: Never
-        image: azuredevops
-        name: azuredevops
+        image: odata
+        name: odata
         resources: {}
         env:
           - name: MAX_LOG_LENGTH

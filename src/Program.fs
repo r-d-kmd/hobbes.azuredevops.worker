@@ -4,6 +4,7 @@ open Readers.AzureDevOps
 open Hobbes.Web
 open Hobbes.Messaging
 open Hobbes.Messaging.Broker
+open Hobbes.FSharp.Compile
 
 let synchronize (source : AzureDevOpsSource.Root) token =
     try
@@ -26,34 +27,28 @@ let synchronize (source : AzureDevOpsSource.Root) token =
 let handleMessage message =
     match message with
     Empty -> Success
-    | Sync sourceDoc -> 
-        Log.debugf "Received message. %s" sourceDoc
+    | Sync configDoc -> 
+        Log.debugf "Received message. %s" configDoc
         try
-            let source = sourceDoc |> AzureDevOpsSource.Parse
-            let getTokenName (s : string) = 
-                s.Replace("-","_").ToUpper()
-                |> sprintf "AZURE_TOKEN_%s"
-
-            let token = 
-                env "AZURE_DEVOPS_PAT" null
-                
-            match synchronize source token with
-            None -> 
-                sprintf "Conldn't syncronize. %s %s" sourceDoc token
-                |> Failure 
-            | Some (key,data) -> 
-                assert(System.String.IsNullOrWhiteSpace key |> not)
-                assert(data.ColumnNames.Length > 0)
-                assert(data.Values.Length = 0 || data.ColumnNames.Length = data.Values.[0].Length)
-                
-                let data = Cache.createCacheRecord key [] data
-                match Http.post (Http.UniformData Http.Update) (data.ToString()) with
-                Http.Success _ -> 
-                   Log.logf "Data uploaded to cache"
-                   Success
-                | Http.Error(status,msg) -> 
-                    sprintf "Upload of %s to uniform data failed. %d %s" (data.ToString()) status msg
-                    |> Failure
+            let config = 
+                (configDoc |> Config.Parse).Transformation
+                |> Hobbes.FSharp.Compile.compile
+            let data = ODataProvider.read config.Source
+            let CompiledBlock.Transformation(transformation) = 
+                config.Blocks
+                |> Seq.filter(function
+                                Transformation _ -> true
+                                | _ -> false
+                ) |> Seq.exactlyOne
+            let result = data |> transformation    
+            
+            match Http.post (Http.UniformData Http.Update) (data.ToString()) with
+            Http.Success _ -> 
+               Log.logf "Data uploaded to cache"
+               Success
+            | Http.Error(status,msg) -> 
+                sprintf "Upload of %s to uniform data failed. %d %s" (data.ToString()) status msg
+                |> Failure
         with e ->
             Log.excf e "Failed to process message"
             Excep e
