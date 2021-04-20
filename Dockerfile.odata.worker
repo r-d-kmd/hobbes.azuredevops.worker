@@ -1,14 +1,11 @@
 
 ARG DOTNET_VERSION=5.0
-FROM mcr.microsoft.com/dotnet/sdk:${DOTNET_VERSION} as build
+FROM kmdrd/sdk:${DOTNET_VERSION} as build
 WORKDIR /source
- 
-RUN apt-get update
-RUN apt-get install mono-complete -y
 
 ARG BUILD_CONFIGURATION_ARG=release
 ENV BUILD_CONFIGURATION ${BUILD_CONFIGURATION_ARG}
-ENV BUILD_ENV docker
+
 
 ARG FEED_PAT_ARG=""
 ARG FEED_USER_ARG=""
