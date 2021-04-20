@@ -4,6 +4,7 @@ open Hobbes.Messaging
 open Hobbes.Messaging.Broker
 open Hobbes.FSharp.Compile
 open Hobbes.Web.RawdataTypes
+open Hobbes.Workers.ODataProvider
 
 let private handleMessage message =
     match message with
@@ -11,26 +12,34 @@ let private handleMessage message =
     | Sync configDoc -> 
         Log.debugf "Received message. %s" configDoc
         try
-            let config = 
-                (configDoc |> Hobbes.Web.RawdataTypes.Config.Parse).Transformation
-                |> Hobbes.FSharp.Compile.compile
-                |> Seq.exactlyOne
-            let data = ODataProvider.read config.Source
+            let configuration = 
+                configDoc |> Config.Parse
+            let source = configuration.Source
+            let data = 
+                {
+                    Filter = source.Filter
+                    Select = source.Select
+                    Expand = source.Expand
+                    User   = source.User
+                    Pwd    = source.Pwd
+                    Url    = source.Url.Value
+                } |> Hobbes.Workers.ODataProvider.read
             let transformation = 
-                match config.Blocks
+                match (configuration.Transformation |> Hobbes.FSharp.Compile.compile).Head.Blocks
                     |> Seq.filter(function
                                     Transformation _ -> true
                                     | _ -> false
                     ) |> Seq.exactlyOne with
-                CompiledBlock.Transformation t -> t
+                Transformation t -> t
                 | _ -> failwith "should have been removed"
-            let result = 
+            let resultAsJson = 
                 data 
                 |> Hobbes.FSharp.DataStructures.DataMatrix.fromTable
-                |> transformation    
+                |> transformation
+                |> Hobbes.FSharp.DataStructures.DataMatrix.toJson    
 
             
-            match Http.post (Http.UniformData Http.Update) (data.ToString()) with
+            match Http.post (Http.UniformData Http.Update) resultAsJson with
             Http.Success _ -> 
                Log.logf "Data uploaded to cache"
                Success

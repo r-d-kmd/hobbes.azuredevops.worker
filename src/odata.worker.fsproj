@@ -1,18 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
+    <VersionPrefix>$(MAJOR).$(MINOR).$(BUILD_VERSION)</VersionPrefix>
     <OutputType>Exe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
     <DebugType>Portable</DebugType>
+    <BrokerPath Condition="Exists('../../../common/hobbes.messaging/src/Broker.fs')">../../../common/hobbes.messaging/src/Broker.fs"</BrokerPath>
+    <BrokerPath Condition="$(BrokerPath) == ''">Broker.fs</BrokerPath>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Condition="Exists('../../../libs/hobbes.core/src/hobbes.core.fsproj')" Include="../../../libs/hobbes.core/src/hobbes.core.fsproj" />
-    <ProjectReference Condition="Exists('../../../libs/hobbes.web/src/hobbes.web.fsproj')" Include="../../../libs/hobbes.web/src/hobbes.web.fsproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Condition="Exists('../../../common/hobbes.messaging/src/Broker.fs')" Include="../../../common/hobbes.messaging/src/Broker.fs" />
-    <Compile Condition="! Exists('../../../common/hobbes.messaging/src/Broker.fs')" Include="Broker.fs" />
-    <Compile Include="OdataProvider.fs" />
+    <Compile Include="$(BrokerPath)" />
+    <Compile Include="ODataProvider.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
   <Import Condition="Exists('../../../.paket/Paket.targets')" Project="../../../.paket/Paket.targets" />

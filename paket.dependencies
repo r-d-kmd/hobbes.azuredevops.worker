@@ -1,0 +1,11 @@
+version 6.0.0-beta8
+source https://kmddk.pkgs.visualstudio.com/flowerpot/_packaging/hobbes/nuget/v3/index.json username: "%FEED_PAT%" password: "%FEED_PAT%"
+framework: auto-detect
+storage: none
+
+nuget fsharp.data = 4.0.1
+nuget Newtonsoft.Json
+nuget Thoth.Json.Net
+nuget hobbes.core = 2.0.0-686023
+nuget hobbes.web 
+nuget rabbitmq.client
