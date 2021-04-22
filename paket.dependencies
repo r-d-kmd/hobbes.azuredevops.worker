@@ -6,6 +6,6 @@ storage: none
 nuget fsharp.data = 4.0.1
 nuget Newtonsoft.Json
 nuget Thoth.Json.Net
-nuget hobbes.core = 2.0.0-686023
+nuget hobbes.core
 nuget hobbes.web 
 nuget rabbitmq.client

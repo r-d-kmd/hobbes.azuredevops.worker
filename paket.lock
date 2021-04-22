@@ -1,3 +1,4 @@
+STORAGE: NONE
 RESTRICTION: == net50
 NUGET
   remote: https://kmddk.pkgs.visualstudio.com/flowerpot/_packaging/hobbes/nuget/v3/index.json
@@ -29,13 +30,14 @@ NUGET
       Newtonsoft.Json (>= 12.0.2)
       TaskBuilder.fs (>= 2.1)
       Utf8Json (>= 1.3.7)
-    hobbes.core (2.0.0-686023)
+    hobbes.core (2.1.688758)
       Accord.MachineLearning (>= 3.8)
       Deedle (>= 2.3)
       FParsec (>= 1.1.1)
       FSharp.Core (>= 5.0.1)
       Thoth.Json.Net (>= 5.0)
-    hobbes.web (2.0.17)
+      yaml-parser (>= 1.0)
+    hobbes.web (2.0.18)
       FSharp.Core (>= 5.0)
       FSharp.Data (>= 4.0.1)
       Giraffe (>= 4.1)
@@ -98,3 +100,5 @@ NUGET
       System.Reflection.Emit.Lightweight (>= 4.3)
       System.Threading.Tasks.Extensions (>= 4.4)
       System.ValueTuple (>= 4.4)
+    yaml-parser (1.0.0)
+      FParsec (>= 1.1.1)
