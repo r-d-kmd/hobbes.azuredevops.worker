@@ -17,7 +17,9 @@ module ODataProvider =
             Expand : string option
             User   : string option
             Pwd    : string option
-            Url : string
+            Url    : string
+            Meta   : (string * JsonValue) []
+            Name   : string
         }
     let md5Hash (input : string) =
         use md5Hash = System.Security.Cryptography.MD5.Create()
