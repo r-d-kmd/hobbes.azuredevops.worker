@@ -1,0 +1,5 @@
+commonLabels:
+  app: odata
+
+resources:
+- deployment.yaml
